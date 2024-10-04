@@ -3,7 +3,9 @@ import 'package:audioplayers/audioplayers.dart';
 abstract class AudioPlayingService {
   startPlayer(String url);
 
-  pauseOrResume();
+  pause();
+
+  resume();
 
   seek(Duration duration);
 
@@ -15,12 +17,13 @@ abstract class AudioPlayingService {
 class AudioPlayingServiceI implements AudioPlayingService {
   final player = AudioPlayer();
   @override
-  pauseOrResume() {
-    if (player.state == PlayerState.paused) {
-      player.resume();
-    } else {
-      player.pause();
-    }
+  pause() {
+    player.pause();
+  }
+
+  @override
+  resume() {
+    player.resume();
   }
 
   @override

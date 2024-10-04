@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spotify/spotify.dart';
 
@@ -10,15 +12,6 @@ import '../../../../core/utility/pallete_generator.dart';
 import '../../../../data/model/music_state_model.dart';
 import '../../../../data/services/audio_service.dart';
 
-// Provider definition
-final musicProvider =
-    StateNotifierProvider<MusicLyricsController, MusicState>((ref) {
-  return MusicLyricsController(
-    youtubeService: YoutubeServiceI(),
-    spotifyService: SpotifyServiceI(),
-    audioPlayingService: AudioPlayingServiceI(),
-  );
-});
 
 class MusicLyricsController extends StateNotifier<MusicState> {
   final YoutubeService _youtubeService;
@@ -38,10 +31,10 @@ class MusicLyricsController extends StateNotifier<MusicState> {
     try {
       startLoading();
       final trackDetails =
-          await _spotifyService.getSongDetails("7MXVkk9YMctZqd1Srtv4MB");
+          await _spotifyService.getSongDetails("7z7kvUQGwlC6iOl7vMuAr9");
       final musicModel = await _createMusicModel(trackDetails);
       state = state.copyWith(isLoading: false, musicModel: musicModel);
-      startPlayer(musicModel.audioUrl!);
+      startPlayer(musicModel.audioUrl ?? "");
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -77,8 +70,21 @@ class MusicLyricsController extends StateNotifier<MusicState> {
         songName: songName, artistName: artistName);
   }
 
-  void startPlayer(String url) => _audioPlayingService.startPlayer(url);
-  void pauseResume() => _audioPlayingService.pauseOrResume();
+  void startPlayer(String url) {
+    _audioPlayingService.startPlayer(url);
+    state = state = state.copyWith(isPlaying: true);
+  } 
+
+
+  void pauseResume() {
+    if(state.isPlaying){
+      _audioPlayingService.pause();
+      state = state = state.copyWith(isPlaying: false);
+    }else{
+      _audioPlayingService.resume();
+      state = state = state.copyWith(isPlaying: true);
+    }   
+  }
 
   seek(Duration duration) {
     _audioPlayingService.seek(duration);
@@ -86,3 +92,15 @@ class MusicLyricsController extends StateNotifier<MusicState> {
 
   Stream<Duration> getPositonStream() => _audioPlayingService.durationStream();
 }
+
+
+
+// Provider definition
+final musicProvider =
+    StateNotifierProvider<MusicLyricsController, MusicState>((ref) {
+  return MusicLyricsController(
+    youtubeService: YoutubeServiceI(),
+    spotifyService: SpotifyServiceI(),
+    audioPlayingService: AudioPlayingServiceI(),
+  );
+});

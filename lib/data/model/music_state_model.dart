@@ -7,7 +7,7 @@ class MusicState {
   final MusicModel? musicModel;
 
   const MusicState({
-    this.isLoading = false,
+    this.isLoading = true,
     this.isPlaying = false,
     this.musicModel,
     this.error = "",
